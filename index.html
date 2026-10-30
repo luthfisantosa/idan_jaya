@@ -7,12 +7,15 @@
 <meta name="description" content="Idan Jaya Coffee: kopi susu creamy dari biji Italian Blend (Robusta dan Arabika, dark roast), caramel aren latte. Botol 250 ml Rp 20.000 dan 1 Liter Rp 75.000.">
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy"
-  content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+  content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
 <script>document.documentElement.classList.add('js')</script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,800&family=DM+Mono:wght@500&family=Gaegu:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- anime.js lewat CDN (dipakai page 4). Kalau gagal dimuat, page 4 memakai tween cadangan. -->
+<script defer src="https://cdn.jsdelivr.net/npm/animejs@4.0.0/dist/bundles/anime.umd.min.js"></script>
 
 <style>
   :root{
@@ -213,13 +216,12 @@
   .spek dd{font-family:var(--sans);font-size:.92rem;font-weight:500;text-align:right}
   .spek .u dd{color:var(--oranye);font-weight:600}
 
-  .gelas-area{position:relative;display:grid;place-items:center;min-height:560px}
+  .gelas-area{--W:min(46vw,470px);--L:6%;position:relative;display:grid;place-items:center;min-height:560px}
   .gelas-area .cakram{
-    position:absolute;width:min(46vw,470px);aspect-ratio:1;border-radius:50%;background:var(--oranye);
-    left:6%;top:50%;margin-top:calc(min(46vw,470px) / -2);
+    position:absolute;width:var(--W);aspect-ratio:1;border-radius:50%;background:var(--oranye);
+    left:var(--L);top:50%;margin-top:calc(var(--W) / -2);
   }
-  .gelas-area svg{position:relative;width:min(100%,520px);height:auto;overflow:visible;filter:drop-shadow(0 30px 30px rgba(0,0,0,.4))}
-  .catatan-gelas{position:relative;margin-top:6px;font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;opacity:.55;text-align:center;text-transform:uppercase}
+  .gelas-area svg.gelas-gbr{position:relative;width:min(100%,520px);height:auto;overflow:visible;filter:drop-shadow(0 30px 30px rgba(0,0,0,.4))}
 
   .strip{
     position:absolute;left:-5vw;right:-5vw;bottom:54px;z-index:3;overflow:hidden;
@@ -289,16 +291,79 @@
   .js .muncul{opacity:0;translate:0 36px;transition:opacity .9s ease,translate .9s cubic-bezier(.2,.7,.2,1)}
   .js .muncul.on{opacity:1;translate:0 0}
 
-  footer{background:var(--ink);color:var(--putih);padding:46px 6vw 40px;font-family:var(--mono);font-size:.78rem;opacity:.85;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;border-top:1px solid rgba(235,231,228,.15)}
+  /* =====================================================
+     PAGE 4 : PUTAR BOTOL
+     ===================================================== */
+  .empat{--crease:#2a1a14;position:relative;background:var(--ink);color:var(--putih);padding:90px 0 150px;overflow:hidden;isolation:isolate}
+  .empat .teks-besar{
+    left:-4vw;top:2%;z-index:0;white-space:nowrap;font-family:var(--display);font-weight:800;font-stretch:75%;
+    font-size:clamp(8rem,28vw,26rem);line-height:.85;text-transform:uppercase;
+    color:transparent;-webkit-text-stroke:1.5px rgba(238,106,31,.38);
+  }
+  .latar-empat{position:absolute;inset:0;z-index:0;pointer-events:none}
+  .empat .wrap{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:0 6vw}
+  .empat-grid{display:grid;grid-template-columns:5fr 7fr;gap:4vw;align-items:center;padding-top:50px}
+  .empat h2{
+    font-family:var(--display);font-weight:800;font-stretch:80%;text-transform:uppercase;
+    font-size:clamp(2.6rem,5.6vw,5rem);line-height:.92;letter-spacing:-.005em;margin-bottom:26px;
+  }
+  .empat h2 em{font-style:normal;color:var(--oranye)}
+  .empat p.cerita{font-weight:400;max-width:440px;font-size:1.02rem;line-height:1.7;letter-spacing:-.003em;opacity:.9}
+
+  .kontrol{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px;max-width:460px}
+  .kbtn{
+    font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+    padding:13px 18px;background:transparent;color:var(--putih);cursor:pointer;
+    border:1.5px solid rgba(235,231,228,.5);border-radius:4px 16px 4px 16px;
+    transition:transform .25s,background .25s,color .25s,border-color .25s;
+  }
+  .kbtn:hover{transform:translate(-2px,-2px);background:var(--oranye);color:var(--ink);border-color:var(--oranye)}
+  .kbtn[aria-pressed="true"]{background:var(--oranye);color:var(--ink);border-color:var(--oranye)}
+  .kbtn:focus-visible,.p4-stage:focus-visible{outline:2px solid var(--oranye);outline-offset:4px}
+
+  .baca{margin-top:28px;padding:8px 26px;max-width:360px;display:grid;grid-template-columns:6.5rem 1fr;gap:0 20px}
+  .baca div{padding:12px 0}
+  .baca dt{font-family:var(--mono);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;opacity:.7}
+  .baca dd{font-family:var(--display);font-weight:800;font-stretch:80%;font-size:1.4rem;line-height:1.1;margin-top:6px;color:var(--oranye);white-space:nowrap}
+
+  .p4-stage{
+    --W:min(46vw,460px);position:relative;display:grid;place-items:center;
+    min-height:min(82vh,680px);cursor:grab;touch-action:pan-y;
+    user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;
+  }
+  .p4-stage.pegang{cursor:grabbing}
+  .p4-cakram{
+    position:absolute;left:50%;top:50%;width:var(--W);aspect-ratio:1;border-radius:50%;
+    margin:calc(var(--W) / -2) 0 0 calc(var(--W) / -2);background:var(--oranye);pointer-events:none;
+  }
+  .p4-ring{
+    position:absolute;left:50%;top:50%;width:calc(var(--W) * 1.32);
+    margin:calc(var(--W) * -.66) 0 0 calc(var(--W) * -.66);color:var(--putih);opacity:.35;pointer-events:none;
+  }
+  .p4-ring svg{display:block;width:100%;height:auto}
+  .p4-botol{position:relative;z-index:2;height:min(68vh,580px);pointer-events:none}
+  .p4-botol svg{display:block;height:100%;width:auto;overflow:visible}
+  .p4-petunjuk{
+    position:absolute;left:0;right:0;bottom:0;text-align:center;pointer-events:none;
+    font-family:var(--mono);font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;opacity:.7;
+  }
+
+  footer{
+    background:var(--ink);color:var(--putih);padding:40px 6vw;font-family:var(--mono);font-size:.78rem;
+    display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;border-top:1px solid rgba(235,231,228,.15);
+  }
+  footer span{opacity:.85}
 
   /* ---------- layar kecil ---------- */
   @media(max-width:900px){
     .hero{--H:min(64vh,86vw)}
     .dua-grid{grid-template-columns:1fr}
-    .gelas-area{min-height:460px;order:-1;margin-bottom:10px}
-    .gelas-area .cakram{width:70vw;margin-top:-35vw;left:15%}
+    .gelas-area{--W:70vw;--L:15%;min-height:460px;order:-1;margin-bottom:10px}
     .harga-grid{grid-template-columns:1fr}
     .kolom-kanan{margin-top:0}
+    .empat-grid{grid-template-columns:1fr}
+    .p4-stage{--W:70vw;min-height:520px;order:-1}
+    .p4-botol{height:min(58vh,480px)}
   }
   @media(max-width:700px){
     .hero{--H:min(58vh,86vw)}
@@ -593,7 +658,7 @@
       <div class="gelas-area">
         <div class="layer cakram" aria-hidden="true" data-s="-.14"></div>
         <div data-s=".06" style="position:relative;z-index:2">
-          <svg viewBox="0 0 470 540" role="img" aria-label="Ilustrasi gelas kopi susu berlapis: caramel, espresso Italian Blend, susu, dan gula aren">
+          <svg class="gelas-gbr" viewBox="0 0 470 540" role="img" aria-label="Ilustrasi gelas kopi susu berlapis: caramel, espresso Italian Blend, susu, dan gula aren">
             <defs>
               <clipPath id="gelas">
                 <path d="M50 40H220L204 480Q202 498 184 498H86Q68 498 66 480Z"/>
@@ -655,7 +720,6 @@
               <text x="272" y="451">GULA AREN</text>
             </g>
           </svg>
-          <p class="catatan-gelas">Ilustrasi lapisan rasa</p>
         </div>
       </div>
 
@@ -701,6 +765,7 @@
   <div class="biji-tiga" id="bijiTiga" aria-hidden="true"></div>
 
   <div class="wrap">
+
     <p class="nomor muncul">03 / Rincian harga</p>
     <h2 class="muncul">Rincian <em>harga</em></h2>
     <p class="cerita muncul">Harga botol, tambahan espresso, dan ganti susu. Ganti oatmilk berlaku untuk semua varian.</p>
@@ -762,12 +827,151 @@
   </div>
 </section>
 
-<!-- ============ gelombang: salmon ke footer ============ -->
+<!-- ============ gelombang: salmon ke page 4 ============ -->
 <div class="ombak" aria-hidden="true">
   <svg viewBox="0 0 1440 80" preserveAspectRatio="none" data-s=".1" data-ax="x">
     <path fill="#2a1a14" d="M0 80V44C120 12 250 10 370 38S610 74 730 46 970 6 1090 28 1320 68 1440 32V80Z"/>
   </svg>
 </div>
+
+<!-- ================= PAGE 4 : PUTAR BOTOL ================= -->
+<section class="empat" id="putar">
+  <div class="layer teks-besar" aria-hidden="true" data-s=".18" data-ax="x">PUTAR</div>
+
+  <div class="latar-empat" aria-hidden="true">
+    <div class="layer ring-oranye" data-s=".26" style="right:4%;top:8%;width:34vmin;height:34vmin"></div>
+    <div class="layer ring-oranye" data-s="-.12" style="left:3%;top:66%;width:22vmin;height:22vmin"></div>
+    <div class="layer" data-s=".34" data-rot=".012" style="left:-6vmax;top:24%">
+      <svg class="flat-bean" viewBox="0 0 60 90" style="width:24vmax;rotate:24deg;color:#3a261c"><use href="#beanflat"/></svg>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="empat-grid">
+
+      <div>
+        <p class="nomor muncul">04 / Penampakan botol</p>
+        <h2 class="muncul">Putar <em>botolnya</em></h2>
+        <p class="cerita muncul">Botol 250 ml dari semua sisi. Seret ke kiri atau kanan untuk memutarnya. Saat dilepas, botol meluncur pelan sampai berhenti.</p>
+
+        <div class="kontrol muncul">
+          <button type="button" class="kbtn" id="bAuto" aria-pressed="true">Putar otomatis</button>
+          <button type="button" class="kbtn" id="bSpin">Putar 360°</button>
+          <button type="button" class="kbtn" id="bDepan">Depan</button>
+          <button type="button" class="kbtn" id="bBelakang">Belakang</button>
+        </div>
+
+        <dl class="baca kaca muncul">
+          <div><dt>Sudut</dt></div><div><dd id="rSudut">000°</dd></div>
+          <div><dt>Sisi</dt></div><div><dd id="rSisi">Logo</dd></div>
+        </dl>
+      </div>
+
+      <div class="p4-stage" id="p4Stage" tabindex="0" role="group"
+           aria-label="Botol 250 ml yang bisa diputar. Seret, atau pakai tombol panah kiri dan kanan.">
+        <div class="p4-cakram" aria-hidden="true" data-s="-.08"></div>
+        <div class="p4-ring" aria-hidden="true">
+          <svg viewBox="-100 -100 200 200">
+            <g id="p4Putar">
+              <circle r="99.5" fill="none" stroke="currentColor" stroke-width=".4"/>
+              <path id="p4Ticks" fill="none" stroke="currentColor" stroke-width=".6"/>
+            </g>
+          </svg>
+        </div>
+
+        <div class="p4-botol">
+          <svg id="p4Svg" viewBox="0 0 240 350" role="img" aria-label="Botol Idan Jaya Coffee 250 ml">
+            <defs>
+              <clipPath id="p4Klip">
+                <path d="M80 54H160V76C160 104 215 112 215 164V304Q215 340 180 340H60Q25 340 25 304V164C25 112 80 104 80 76Z"/>
+              </clipPath>
+              <linearGradient id="p4Kopi" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#d9bba0"/>
+                <stop offset=".3" stop-color="#c4a083"/>
+                <stop offset=".7" stop-color="#a98260"/>
+                <stop offset="1" stop-color="#8a6544"/>
+              </linearGradient>
+              <linearGradient id="p4Sisi" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#2a0f04" stop-opacity=".4"/>
+                <stop offset=".25" stop-color="#2a0f04" stop-opacity="0"/>
+                <stop offset=".7" stop-color="#2a0f04" stop-opacity="0"/>
+                <stop offset="1" stop-color="#2a0f04" stop-opacity=".46"/>
+              </linearGradient>
+              <linearGradient id="p4Tg" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#000" stop-opacity=".24"/>
+                <stop offset=".22" stop-color="#000" stop-opacity="0"/>
+                <stop offset=".72" stop-color="#000" stop-opacity="0"/>
+                <stop offset="1" stop-color="#000" stop-opacity=".32"/>
+              </linearGradient>
+              <filter id="p4Blur" x="-30%" y="-300%" width="160%" height="700%">
+                <feGaussianBlur stdDeviation="5"/>
+              </filter>
+            </defs>
+
+            <ellipse id="p4Bayang" cx="120" cy="346" rx="78" ry="8" fill="#000" filter="url(#p4Blur)" opacity="0"/>
+
+            <g id="p4Badan" opacity="0">
+              <!-- kaca -->
+              <path d="M80 54H160V76C160 104 215 112 215 164V304Q215 340 180 340H60Q25 340 25 304V164C25 112 80 104 80 76Z" fill="#fff" fill-opacity=".14"/>
+
+              <g clip-path="url(#p4Klip)">
+                <rect x="0" y="84" width="240" height="280" fill="url(#p4Kopi)"/>
+                <rect x="0" y="84" width="240" height="3" fill="#f3e2cb" opacity=".7"/>
+
+                <!-- cetakan yang melingkari botol (digeser script) -->
+                <path id="p4Dam" fill="#1d1612"/>
+                <rect x="25" y="299" width="190" height="3" fill="#1d1612"/>
+
+                <!-- depan: logo -->
+                <g id="p4E0"><use href="#logoidan" x="-58" y="150" width="116" height="133"/></g>
+
+                <!-- samping: ukuran -->
+                <g id="p4E1" fill="#1d1612" text-anchor="middle" font-family="'Bricolage Grotesque','Arial Narrow',Impact,sans-serif" font-weight="800">
+                  <text x="0" y="226" font-size="54" textLength="64" lengthAdjust="spacingAndGlyphs">250</text>
+                  <text x="0" y="252" font-size="24" textLength="40" lengthAdjust="spacingAndGlyphs">ML</text>
+                </g>
+
+                <!-- belakang: keterangan -->
+                <g id="p4E2" fill="#1d1612" text-anchor="middle" font-family="'DM Mono',ui-monospace,monospace" font-weight="500">
+                  <text x="0" y="192" font-size="17" font-weight="800" font-family="'Bricolage Grotesque','Arial Narrow',Impact,sans-serif" textLength="118" lengthAdjust="spacingAndGlyphs">IDAN JAYA COFFEE</text>
+                  <rect x="-59" y="200" width="118" height="1.6"/>
+                  <text x="0" y="218" font-size="7.4" textLength="118">KOPI SUSU CARAMEL AREN LATTE</text>
+                  <text x="0" y="242" font-size="21" font-weight="800" font-family="'Bricolage Grotesque','Arial Narrow',Impact,sans-serif" textLength="118" lengthAdjust="spacingAndGlyphs">ITALIAN BLEND</text>
+                  <text x="0" y="259" font-size="8" textLength="112">ROBUSTA + ARABIKA</text>
+                  <text x="0" y="273" font-size="8" textLength="112">DARK ROAST · 250 ML</text>
+                </g>
+
+                <!-- samping: dark roast -->
+                <g id="p4E3" fill="#1d1612" text-anchor="middle" font-family="'Bricolage Grotesque','Arial Narrow',Impact,sans-serif" font-weight="800">
+                  <text x="0" y="214" font-size="38" textLength="66" lengthAdjust="spacingAndGlyphs">DARK</text>
+                  <text x="0" y="250" font-size="38" textLength="74" lengthAdjust="spacingAndGlyphs">ROAST</text>
+                  <text x="0" y="270" font-size="8" font-family="'DM Mono',ui-monospace,monospace" font-weight="500" textLength="50">CREAMY</text>
+                </g>
+
+                <rect x="0" y="0" width="240" height="350" fill="url(#p4Sisi)"/>
+              </g>
+
+              <!-- kilau kaca (diam) -->
+              <path d="M38 190V290" stroke="#fff" stroke-opacity=".4" stroke-width="8" stroke-linecap="round"/>
+              <path d="M76 100C60 112 44 124 38 156" stroke="#fff" stroke-opacity=".5" stroke-width="5" stroke-linecap="round" fill="none"/>
+              <path d="M203 190V250" stroke="#fff" stroke-opacity=".22" stroke-width="4" stroke-linecap="round"/>
+              <path d="M80 54H160V76C160 104 215 112 215 164V304Q215 340 180 340H60Q25 340 25 304V164C25 112 80 104 80 76Z" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="2"/>
+
+              <!-- tutup putih (alurnya ikut berputar) -->
+              <rect x="70" y="6" width="100" height="50" rx="7" fill="#f5f1ea" stroke="#d9d2c7"/>
+              <path id="p4Alur" stroke="#cfc7ba" stroke-width="2" fill="none"/>
+              <rect x="70" y="6" width="100" height="50" rx="7" fill="url(#p4Tg)"/>
+              <rect x="74" y="54" width="92" height="8" rx="3" fill="#ece6dc" stroke="#d9d2c7"/>
+            </g>
+          </svg>
+        </div>
+
+        <p class="p4-petunjuk" aria-hidden="true">Seret ke kiri atau kanan</p>
+      </div>
+
+    </div>
+  </div>
+</section>
 </main>
 
 <footer>
@@ -1004,6 +1208,241 @@
   }
 
   render();
+
+  /* =====================================================
+     PAGE 4 : BOTOL 250 ml YANG BISA DIPUTAR
+     anime.js (CDN) menganimasikan OBJEK biasa: S.th (sudut), motor.v (kecepatan), intro.k (masuk).
+     Kalau anime.js gagal dimuat, tween cadangan di bawah mengambil alih, jadi halaman tetap jalan.
+     ===================================================== */
+  (function(){
+    const stage = document.getElementById('p4Stage');
+    if(!stage) return;
+
+    const $ = id => document.getElementById(id);
+    const svgEl = $('p4Svg'), badan = $('p4Badan'), bayang = $('p4Bayang'),
+          dam = $('p4Dam'), alur = $('p4Alur'), cincin = $('p4Putar'),
+          rSudut = $('rSudut'), rSisi = $('rSisi'), bAuto = $('bAuto');
+
+    const PI = Math.PI, DUAPI = PI * 2, H = PI / 2;
+    const CX = 120, R = 95, RT = 50;        // pusat, jari-jari badan, jari-jari tutup (satuan SVG)
+    const IDLE = 0.5;                       // kecepatan putar otomatis (radian/detik)
+    const NAMA_SISI = ['Logo', 'Dark roast', 'Belakang', 'Ukuran'];
+    const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+    const norm  = a => { a = (a + PI) % DUAPI; if(a < 0) a += DUAPI; return a - PI; };
+
+    const S = { th: 0 };      // sudut putar botol
+    const motor = { v: 0 };   // kecepatan putar
+    const intro = { k: 0 };   // 0 = belum muncul, 1 = penuh
+    let auto = !diam, drag = false, lastX = 0, lastT = 0;
+    let vel = 0, lean = 0, omega = 0, prevTh = 0, lastDeg = -1;
+    let hSnap = null, hMotor = null;
+
+    bAuto.setAttribute('aria-pressed', String(auto));
+    if(diam) intro.k = 1;
+
+    /* ---------- tween: anime.js, dengan cadangan bila library tidak ada ---------- */
+    const EASE = {
+      linear:   t => t,
+      outCubic: t => 1 - Math.pow(1 - t, 3),
+      outExpo:  t => t >= 1 ? 1 : 1 - Math.pow(2, -10 * t),
+      inOutSine:t => -(Math.cos(PI * t) - 1) / 2,
+      inOutExpo:t => t <= 0 ? 0 : t >= 1 ? 1 : t < .5 ? Math.pow(2, 20 * t - 10) / 2 : (2 - Math.pow(2, -20 * t + 10)) / 2
+    };
+    function jalan(obj, to, opt){
+      const o = Object.assign({ duration: 800, ease: 'outExpo' }, opt);
+      const A = window.anime && window.anime.animate;
+      if(typeof A === 'function'){
+        try{
+          const p = Object.assign({}, to, { duration: o.duration, ease: o.ease });
+          if(o.onComplete) p.onComplete = o.onComplete;
+          const h = A(obj, p);
+          return { pause(){ try{ h.pause(); }catch(e){} } };
+        }catch(e){ /* jatuh ke tween cadangan */ }
+      }
+      const from = {};
+      Object.keys(to).forEach(k => { from[k] = obj[k]; });
+      const f = EASE[o.ease] || EASE.outCubic;
+      let t0 = null, mati = false, raf = 0;
+      const step = now => {
+        if(mati) return;
+        if(t0 === null) t0 = now;
+        const p = Math.min(1, (now - t0) / o.duration), e = f(p);
+        for(const k in to) obj[k] = from[k] + (to[k] - from[k]) * e;
+        if(p < 1) raf = requestAnimationFrame(step); else if(o.onComplete) o.onComplete();
+      };
+      raf = requestAnimationFrame(step);
+      return { pause(){ mati = true; cancelAnimationFrame(raf); } };
+    }
+
+    const hentikanSnap  = () => { if(hSnap)  { hSnap.pause();  hSnap = null; } };
+    const hentikanMotor = () => { if(hMotor) { hMotor.pause(); hMotor = null; } };
+
+    // kecepatan putar menuju target (otomatis atau diam) dengan halus
+    function tenang(ease, dur){
+      hentikanMotor();
+      hMotor = jalan(motor, { v: auto ? IDLE : 0 }, { duration: dur || 2200, ease: ease || 'outExpo' });
+    }
+    // putar ke sudut tertentu
+    function ke(target, dur, ease){
+      hentikanSnap(); hentikanMotor(); motor.v = 0;
+      hSnap = jalan(S, { th: target }, {
+        duration: dur, ease,
+        onComplete: () => { hSnap = null; motor.v = 0; tenang('inOutSine', 1400); }
+      });
+    }
+
+    /* ---------- tombol & keyboard ---------- */
+    bAuto.addEventListener('click', () => {
+      auto = !auto;
+      bAuto.setAttribute('aria-pressed', String(auto));
+      if(!drag && !hSnap) tenang('inOutSine', 1200);
+    });
+    $('bSpin').addEventListener('click', () => ke(S.th + DUAPI, 1800, 'inOutExpo'));
+    $('bDepan').addEventListener('click', () => ke(Math.round(S.th / DUAPI) * DUAPI, 1100, 'outExpo'));
+    $('bBelakang').addEventListener('click', () => ke(Math.round((S.th - PI) / DUAPI) * DUAPI + PI, 1100, 'outExpo'));
+    stage.addEventListener('keydown', e => {
+      if(e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      e.preventDefault();
+      ke(S.th + (e.key === 'ArrowRight' ? 1 : -1) * PI / 6, 800, 'outCubic');
+    });
+
+    /* ---------- seret dengan mouse / jari ---------- */
+    const pxPerRad = () => R * svgEl.getBoundingClientRect().width / 240;
+    stage.addEventListener('dragstart', e => e.preventDefault());
+    stage.addEventListener('pointerdown', e => {
+      if(e.pointerType === 'mouse' && e.button !== 0) return;
+      drag = true; lastX = e.clientX; lastT = performance.now(); vel = 0;
+      hentikanSnap(); hentikanMotor(); motor.v = 0;
+      stage.classList.add('pegang');
+      try{ stage.setPointerCapture(e.pointerId); }catch(_){}
+    });
+    stage.addEventListener('pointermove', e => {
+      if(!drag) return;
+      const now = performance.now(), dt = Math.max(.008, (now - lastT) / 1000);
+      const rad = (e.clientX - lastX) / pxPerRad();
+      S.th += rad;
+      vel = vel * .5 + (rad / dt) * .5;
+      lastX = e.clientX; lastT = now;
+    });
+    const lepas = () => {
+      if(!drag) return;
+      drag = false;
+      stage.classList.remove('pegang');
+      motor.v = clamp(vel, -16, 16);      // sisa kecepatan jari jadi momentum
+      tenang('outCubic', 2600);           // lalu melambat halus
+    };
+    stage.addEventListener('pointerup', lepas);
+    stage.addEventListener('pointercancel', lepas);
+    stage.addEventListener('lostpointercapture', lepas);
+
+    /* ---------- gambar: letakkan semua cetakan sesuai sudut ---------- */
+    (function(){
+      let d = '';
+      for(let i = 0; i < 72; i++){
+        const a = i * PI / 36, r1 = i % 6 === 0 ? 91 : 95, r2 = 99;
+        d += 'M' + (r1 * Math.cos(a)).toFixed(2) + ' ' + (r1 * Math.sin(a)).toFixed(2)
+           + 'L' + (r2 * Math.cos(a)).toFixed(2) + ' ' + (r2 * Math.sin(a)).toFixed(2);
+      }
+      $('p4Ticks').setAttribute('d', d);
+    })();
+
+    const ELEM = [0, H, PI, PI + H].map((f, i) => ({ f, g: $('p4E' + i) }));
+    const KOLOM = 30, DEL = DUAPI / KOLOM, ALUR = 18;
+
+    function gambar(t){
+      const th = S.th;
+
+      // elemen cetak: geser dengan sin, pipihkan dengan cos, sembunyikan bila membelakangi
+      for(const e of ELEM){
+        const a = e.f + th, c = Math.cos(a);
+        if(c < .06){ e.g.setAttribute('visibility', 'hidden'); continue; }
+        e.g.setAttribute('visibility', 'visible');
+        e.g.setAttribute('transform', 'translate(' + (CX + R * Math.sin(a)).toFixed(2) + ' 0) scale(' + c.toFixed(4) + ' 1)');
+        e.g.setAttribute('opacity', Math.min(1, (c - .06) * 3).toFixed(3));
+      }
+
+      // pita kotak-kotak: 30 kolom mengelilingi botol
+      let d = '';
+      for(let i = 0; i < KOLOM; i++){
+        const a1 = norm(i * DEL + th), a2 = a1 + DEL;
+        if(a2 <= -H || a1 >= H) continue;
+        const x1 = CX + R * Math.sin(Math.max(a1, -H));
+        const x2 = CX + R * Math.sin(Math.min(a2, H));
+        const w = x2 - x1;
+        if(w < .15) continue;
+        for(let r = 0; r < 2; r++){
+          if((i + r) % 2 === 0) d += 'M' + x1.toFixed(2) + ' ' + (300 + r * 20) + 'h' + w.toFixed(2) + 'v20h' + (-w).toFixed(2) + 'z';
+        }
+      }
+      dam.setAttribute('d', d);
+
+      // alur tutup
+      let g = '';
+      for(let i = 0; i < ALUR; i++){
+        const a = norm(i * DUAPI / ALUR + th);
+        if(Math.cos(a) > .05) g += 'M' + (CX + RT * Math.sin(a)).toFixed(2) + ' 10V52';
+      }
+      alur.setAttribute('d', g);
+
+      // cincin skala di belakang
+      cincin.setAttribute('transform', 'rotate(' + (-th * 90 / PI).toFixed(2) + ')');
+
+      // botol: melayang, miring mengikuti kecepatan, masuk dari kecil
+      const y = Math.sin(t / 1000 * 1.15) * 2.6 * intro.k;
+      const sc = .86 + .14 * intro.k;
+      badan.setAttribute('transform',
+        'translate(0 ' + y.toFixed(2) + ') translate(120 340) rotate(' + lean.toFixed(2) + ') scale(' + sc.toFixed(4) + ') translate(-120 -340)');
+      badan.setAttribute('opacity', intro.k.toFixed(3));
+      bayang.setAttribute('opacity', (.42 * intro.k).toFixed(3));
+      bayang.setAttribute('rx', (78 * sc * (1 - y * .012)).toFixed(1));
+
+      // pembacaan sudut
+      const deg = Math.round(((th * 180 / PI) % 360 + 360) % 360) % 360;
+      if(deg !== lastDeg){
+        lastDeg = deg;
+        rSudut.textContent = String(deg).padStart(3, '0') + '°';
+        rSisi.textContent = NAMA_SISI[Math.round(deg / 90) % 4];
+      }
+    }
+
+    /* ---------- loop: hanya jalan saat section terlihat ---------- */
+    let rafL = 0, last = 0;
+    function putaran(now){
+      rafL = requestAnimationFrame(putaran);
+      const dt = Math.min(.05, Math.max(.001, (now - last) / 1000));
+      last = now;
+      if(!drag && !hSnap) S.th += motor.v * dt;
+      vel *= Math.exp(-dt * 7);
+      omega += ((S.th - prevTh) / dt - omega) * (1 - Math.exp(-dt * 12));
+      prevTh = S.th;
+      lean += (clamp(omega * 1.3, -9, 9) - lean) * (1 - Math.exp(-dt * 9));
+      gambar(now);
+    }
+    function mulaiLoop(){ if(rafL) return; last = performance.now(); prevTh = S.th; rafL = requestAnimationFrame(putaran); }
+    function hentiLoop(){ cancelAnimationFrame(rafL); rafL = 0; }
+
+    new IntersectionObserver(es => {
+      es.forEach(e => { if(e.isIntersecting) mulaiLoop(); else hentiLoop(); });
+    }, { rootMargin: '120px' }).observe($('putar'));
+
+    /* ---------- intro: botol berputar masuk lalu berhenti di depan ---------- */
+    const ioIntro = new IntersectionObserver(es => {
+      es.forEach(e => {
+        if(!e.isIntersecting) return;
+        ioIntro.disconnect();
+        if(diam){ intro.k = 1; S.th = 0; return; }
+        S.th = -DUAPI;
+        hSnap = jalan(S, { th: 0 }, {
+          duration: 2800, ease: 'outExpo',
+          onComplete: () => { hSnap = null; motor.v = 0; tenang('inOutSine', 1600); }
+        });
+        jalan(intro, { k: 1 }, { duration: 1400, ease: 'outExpo' });
+      });
+    }, { threshold: .35 });
+    ioIntro.observe(stage);
+
+    gambar(0);
+  })();
 </script>
 </body>
 </html>
